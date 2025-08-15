@@ -1,0 +1,19 @@
+# 应用配置参数
+app_name: "fuck!!!!!!!!!"
+version: "1.0"
+debug_mode: true
+
+# 数值参数
+max_connections: 50
+timeout_seconds: 30
+retry_count: 3
+threshold: 0.85
+
+# 系统配置
+enable_logging: true
+log_level: "INFO"
+buffer_size: 1024
+
+# 实验性功能
+experimental_feature: false
+multiplier: 2.5

@@ -28,10 +28,10 @@
 #include <vector>
 
 // Third-party library headers
+#include <spdlog/spdlog.h>
 #include <opencv4/opencv2/core.hpp>
 #include <opencv4/opencv2/core/persistence.hpp>
 #include <opencv4/opencv2/opencv.hpp>
-#include <spdlog/spdlog.h>
 
 class FileReader {
  public:
@@ -44,8 +44,8 @@ class FileReader {
       : file_path_(file_path), is_open_(false) {
     fs_.open(file_path_, cv::FileStorage::READ);
     if (!fs_.isOpened()) {
-      std::string error_msg = "File \"" + file_path + "\" open failed.";
-      std::cerr << error_msg << "\n";
+      std::string error_msg = "File:" + file_path + " open failed.";
+      SPDLOG_ERROR(error_msg);
       throw std::runtime_error(error_msg);
     }
     is_open_ = true;
@@ -71,12 +71,14 @@ class FileReader {
   template <typename T>
   T Read(const std::string& key) {
     if (!is_open_ || !fs_.isOpened()) {
+      SPDLOG_ERROR("FileReader is not open");
       throw std::runtime_error("FileReader is not open");
     }
 
     const char* cstr = key.c_str();
     if (fs_[cstr].empty()) {
-      throw std::runtime_error("Key: \"" + key + "\" not found in the file.");
+      SPDLOG_ERROR("Key:{} not found in the file.", key);
+      throw std::runtime_error("Key:" + key + " not found in the file.");
     }
     T value;
     fs_[cstr] >> value;
@@ -100,8 +102,8 @@ class FileWriter {
       : file_path_(file_path), is_open_(false) {
     fs_.open(file_path_, cv::FileStorage::WRITE);
     if (!fs_.isOpened()) {
-      std::string error_msg = "File \"" + file_path + "\" open failed.";
-      SPDLOG_ERROR("File {} open failed",file_path_);
+      std::string error_msg = "File:" + file_path + " open failed.";
+      SPDLOG_ERROR("File:{} open failed", file_path_);
       throw std::runtime_error(error_msg);
     }
     is_open_ = true;
@@ -127,6 +129,7 @@ class FileWriter {
   template <typename T>
   void Write(const std::string& key, const T& value) {
     if (!is_open_ || !fs_.isOpened()) {
+      SPDLOG_ERROR("FileWriter is not open");
       throw std::runtime_error("FileWriter is not open");
     }
 
@@ -174,7 +177,8 @@ class HotReloadFileReader {
     std::lock_guard<std::mutex> lock(config_mutex_);
     auto it = config_cache_.find(key);
     if (it == config_cache_.end()) {
-      throw std::runtime_error("Key '" + key + "' not found in config");
+      SPDLOG_ERROR("Key:{} not found in config", key);
+      throw std::runtime_error("Key:" + key + " not found in config");
     }
     return ParseValue<T>(it->second);
   }
@@ -199,6 +203,7 @@ class HotReloadFileReader {
     } else if constexpr (std::is_same_v<T, double>) {
       return std::stod(value);
     } else {
+      SPDLOG_ERROR("Unsupported type");
       static_assert(std::is_same_v<T, void>, "Unsupported type");
       return T{};
     }
@@ -209,15 +214,16 @@ class HotReloadFileReader {
       std::lock_guard<std::mutex> lock(config_mutex_);
 
       if (!std::filesystem::exists(file_path_)) {
-        std::cerr << "Warning: Config file does not exist: " << file_path_
-                  << std::endl;
+        SPDLOG_ERROR("Config file:{} does not exist", file_path_);
+        throw std::runtime_error("Warning: Config file:" + file_path_ +
+                                 " does not exist");
         return;
       }
 
       std::ifstream file(file_path_);
       if (!file.is_open()) {
-        std::cerr << "Warning: Could not open config file: " << file_path_
-                  << std::endl;
+        SPDLOG_ERROR("Could not open config file:{}", file_path_);
+        throw std::runtime_error("Could not open config file:" + file_path_);
         return;
       }
 
@@ -252,10 +258,10 @@ class HotReloadFileReader {
       }
 
       last_write_time_ = std::filesystem::last_write_time(file_path_);
-      // std::cout << "Config file reloaded: \n  " << file_path_ << std::endl;
-      SPDLOG_INFO("Config file reloaded: {}",file_path_);
+      SPDLOG_INFO("Config file reloaded:{}", file_path_);
     } catch (const std::exception& e) {
-      std::cerr << "Error loading config: " << e.what() << std::endl;
+      SPDLOG_ERROR("Error loading config:{}", e.what());
+      throw std::runtime_error(std::string("Error loading config:") + e.what());
     }
   }
 
@@ -270,7 +276,9 @@ class HotReloadFileReader {
           }
         }
       } catch (const std::exception& e) {
-        std::cerr << "Error monitoring file: " << e.what() << std::endl;
+        SPDLOG_ERROR("Error monitoring file:{}", e.what());
+        throw std::runtime_error(std::string("Error monitoring file:") +
+                                 e.what());
       }
 
       std::this_thread::sleep_for(check_interval_);

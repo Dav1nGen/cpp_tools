@@ -78,5 +78,3 @@ CheckOptions:
   value:           true
 
 HeaderFilterRegex: '^include/.*\.hpp$'
-
-

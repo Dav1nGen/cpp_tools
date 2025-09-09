@@ -149,6 +149,26 @@ class HotReloadFileReader {
         check_interval_(check_interval),
         running_(false) {}
 
+  HotReloadFileReader(const HotReloadFileReader& other)
+      : file_path_(other.file_path_),
+        check_interval_(other.check_interval_),
+        running_(false) {
+    std::lock_guard<std::mutex> lock(other.config_mutex_);
+    config_cache_ = other.config_cache_;
+    last_write_time_ = other.last_write_time_;
+  }
+
+  HotReloadFileReader& operator=(const HotReloadFileReader& other) {
+    file_path_ = other.file_path_;
+    check_interval_ = other.check_interval_;
+    running_ = false;
+    std::lock_guard<std::mutex> lock(other.config_mutex_);
+    config_cache_ = other.config_cache_;
+    last_write_time_ = other.last_write_time_;
+
+    return *this;
+  }
+
   ~HotReloadFileReader() { Stop(); }
 
   void Start() {

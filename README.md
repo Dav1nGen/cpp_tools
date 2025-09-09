@@ -56,7 +56,7 @@ int main() {
 
 **使用方法:**
 
-该示例展示了如何启动热加载功能，并在主循环中持续获取最新的配置值。
+1. 该示例展示了如何启动热加载功能，并在主循环中持续获取最新的配置值。
 ```cpp
 #include "file_reader.hpp"
 #include <iostream>
@@ -95,3 +95,44 @@ int main() {
 }
 ```
 其中Read模板函数的使用方法与 `FileReader` 类似，但是需要开一个新线程不断循环读取以获取最新配置参数。
+
+2. 以下示例演示了如何在其他对象中使用 `HotReloadFileReader`配置读取器：
+```cpp
+class Entity {
+ public:
+  explicit Entity(std::string config_name) {
+    config_path_ = std::string(CONFIG_DIR) + config_name;
+    SPDLOG_INFO(config_path_);
+
+    hot_reload_file_reader_ =
+        std::make_unique<HotReloadFileReader>(config_path_);
+  }
+  ~Entity() = default;
+
+  void GetConfig() {
+    hot_reload_file_reader_->Start();
+
+    std::thread t([this]() {
+      while (true) {
+        name_ = hot_reload_file_reader_->Read<std::string>("string_parameter");
+        id_ = hot_reload_file_reader_->Read<int>("int_parameter");
+      }
+    });
+    t.detach();
+  }
+
+  void PrintConfig() {
+    while (true) {
+      std::cout << "name: " << name_ << "\n"
+                << "id: " << id_ << "\n";
+      sleep(1);
+    }
+  }
+
+ private:
+  std::string name_ = "1";
+  int id_ = 0;
+  std::string config_path_;
+  std::unique_ptr<HotReloadFileReader> hot_reload_file_reader_;  // 创建HotReloadFileReader指针，并在构造函数中make_unique初始化即可使用
+};
+```

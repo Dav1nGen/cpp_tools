@@ -1,7 +1,7 @@
 %YAML:1.0
 ---
 string_parameter: "string"
-int_parameter: 5
+int_parameter: 259
 bool_parameter: true
 double_parameter: 1.001
 float_parameter: 1.2421

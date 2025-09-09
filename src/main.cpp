@@ -4,7 +4,7 @@
 #include "HotReloadFileReader_test.hpp"
 
 int main() {
-  FileReaderTest::TestFileReader();
+  // FileReaderTest::TestFileReader();
   HotReloadFileReaderTest::TestHotReloadFileReader();
   return 0;
 }

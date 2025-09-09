@@ -1,3 +1,0 @@
-/home/dav1ngen/my_documents/dav1ngen_common/build/CMakeFiles/hot_reload_demo.dir
-/home/dav1ngen/my_documents/dav1ngen_common/build/CMakeFiles/edit_cache.dir
-/home/dav1ngen/my_documents/dav1ngen_common/build/CMakeFiles/rebuild_cache.dir

@@ -11,8 +11,8 @@
 
 #pragma once
 // C++ standard library header file
-#include <algorithm>
 #include <assert.h>
+#include <algorithm>
 #include <atomic>
 #include <cctype>
 #include <chrono>
@@ -33,13 +33,13 @@
 #include <opencv4/opencv2/opencv.hpp>
 
 class FileReader {
-public:
+ public:
   /**
    * @brief Construct a new file reader object
    *
    * @param File_ path
    */
-  explicit FileReader(const std::string &file_path)
+  explicit FileReader(const std::string& file_path)
       : file_path_(file_path), is_open_(false) {
     fs_.open(file_path_, cv::FileStorage::READ);
     if (!fs_.isOpened()) {
@@ -67,12 +67,13 @@ public:
    * @param key
    * @return T
    */
-  template <typename T> T Read(const std::string &key) {
+  template <typename T>
+  T Read(const std::string& key) {
     if (!is_open_ || !fs_.isOpened()) {
       throw std::runtime_error("FileReader is not open");
     }
 
-    const char *cstr = key.c_str();
+    const char* cstr = key.c_str();
     if (fs_[cstr].empty()) {
       throw std::runtime_error("Key: \"" + key + "\" not found in the file.");
     }
@@ -81,20 +82,20 @@ public:
     return value;
   }
 
-private:
+ private:
   const std::string file_path_;
   cv::FileStorage fs_;
   bool is_open_ = false;
 };
 
 class FileWriter {
-public:
+ public:
   /**
    * @brief Construct a new file writer object
    *
    * @param file_path
    */
-  explicit FileWriter(const std::string &file_path)
+  explicit FileWriter(const std::string& file_path)
       : file_path_(file_path), is_open_(false) {
     fs_.open(file_path_, cv::FileStorage::WRITE);
     if (!fs_.isOpened()) {
@@ -122,7 +123,8 @@ public:
    * @param key
    * @param value
    */
-  template <typename T> void Write(const std::string &key, const T &value) {
+  template <typename T>
+  void Write(const std::string& key, const T& value) {
     if (!is_open_ || !fs_.isOpened()) {
       throw std::runtime_error("FileWriter is not open");
     }
@@ -130,18 +132,19 @@ public:
     fs_ << key << value;
   }
 
-private:
+ private:
   cv::FileStorage fs_;
   std::string file_path_;
   bool is_open_ = false;
 };
 
 class HotReloadFileReader {
-public:
-  explicit HotReloadFileReader(const std::string &file_path,
+ public:
+  explicit HotReloadFileReader(const std::string& file_path,
                                std::chrono::milliseconds check_interval =
                                    std::chrono::milliseconds(1000))
-      : file_path_(file_path), check_interval_(check_interval),
+      : file_path_(file_path),
+        check_interval_(check_interval),
         running_(false) {}
 
   ~HotReloadFileReader() { Stop(); }
@@ -165,7 +168,7 @@ public:
     }
   }
 
-  std::string GetValue(const std::string &key) const {
+  std::string GetValue(const std::string& key) const {
     std::lock_guard<std::mutex> lock(config_mutex_);
     auto it = config_cache_.find(key);
     if (it == config_cache_.end()) {
@@ -180,8 +183,9 @@ public:
     return value;
   }
 
-private:
-  template <typename T> T ParseValue(const std::string &value) const {
+ private:
+  template <typename T>
+  T ParseValue(const std::string& value) const {
     if constexpr (std::is_same_v<T, std::string>) {
       if (value.front() == '"' && value.back() == '"') {
         return value.substr(1, value.length() - 2);
@@ -253,7 +257,7 @@ private:
 
       last_write_time_ = std::filesystem::last_write_time(file_path_);
       std::cout << "Config file reloaded: \n  " << file_path_ << std::endl;
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       std::cerr << "Error loading config: " << e.what() << std::endl;
     }
   }
@@ -268,7 +272,7 @@ private:
             LoadConfig();
           }
         }
-      } catch (const std::exception &e) {
+      } catch (const std::exception& e) {
         std::cerr << "Error monitoring file: " << e.what() << std::endl;
       }
 

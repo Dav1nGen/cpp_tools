@@ -45,6 +45,7 @@ target_include_directories(
   PUBLIC
   ${OPENCV_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/test
 )
 
 target_link_libraries(

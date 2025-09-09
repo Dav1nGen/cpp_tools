@@ -2,7 +2,7 @@
  * @file thread_communicate.hpp
  * @author Dav1nGen (davicheng1114@gmail.com)
  * @brief 
- * @version 0.1
+ * @version 1.0
  * @date 2025-07-15
  * 
  * @copyright Copyright (c) 2025
@@ -35,7 +35,7 @@ class ThreadCommunicate {
   DATA_TYPE GetLatestData();
   void Stop();
 
-  std::atomic<bool> is_running = true;
+  std::atomic<bool> is_running = true;  // wait fix
 
  private:
   std::atomic<bool> stop_flag_ = false;

@@ -2,8 +2,8 @@
  * @file file_reader.hpp
  * @author Dav1nGen (davicheng1114@gmail.com)
  * @brief
- * @version 0.2
- * @date 2025-08-14
+ * @version 1.0
+ * @date 2025-09-9
  *
  * @copyright Copyright (c) 2025
  *
@@ -40,8 +40,7 @@ class FileReader {
    *
    * @param File_ path
    */
-  explicit FileReader(const std::string& file_path)
-      : file_path_(file_path), is_open_(false) {
+  explicit FileReader(const std::string& file_path) : file_path_(file_path) {
     fs_.open(file_path_, cv::FileStorage::READ);
     if (!fs_.isOpened()) {
       std::string error_msg = "File:" + file_path + " open failed.";
@@ -98,8 +97,7 @@ class FileWriter {
    *
    * @param file_path
    */
-  explicit FileWriter(const std::string& file_path)
-      : file_path_(file_path), is_open_(false) {
+  explicit FileWriter(const std::string& file_path) : file_path_(file_path) {
     fs_.open(file_path_, cv::FileStorage::WRITE);
     if (!fs_.isOpened()) {
       std::string error_msg = "File:" + file_path + " open failed.";

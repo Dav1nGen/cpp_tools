@@ -31,6 +31,7 @@
 #include <opencv4/opencv2/core.hpp>
 #include <opencv4/opencv2/core/persistence.hpp>
 #include <opencv4/opencv2/opencv.hpp>
+#include <spdlog/spdlog.h>
 
 class FileReader {
  public:
@@ -100,7 +101,7 @@ class FileWriter {
     fs_.open(file_path_, cv::FileStorage::WRITE);
     if (!fs_.isOpened()) {
       std::string error_msg = "File \"" + file_path + "\" open failed.";
-      std::cerr << error_msg << "\n";
+      SPDLOG_ERROR("File {} open failed",file_path_);
       throw std::runtime_error(error_msg);
     }
     is_open_ = true;
@@ -168,19 +169,14 @@ class HotReloadFileReader {
     }
   }
 
-  std::string GetValue(const std::string& key) const {
+  template <typename T>
+  T Read(const std::string& key) const {
     std::lock_guard<std::mutex> lock(config_mutex_);
     auto it = config_cache_.find(key);
     if (it == config_cache_.end()) {
       throw std::runtime_error("Key '" + key + "' not found in config");
     }
-
-    // 如果是字符串类型且有引号，去掉引号
-    std::string value = it->second;
-    if (value.front() == '"' && value.back() == '"') {
-      return value.substr(1, value.length() - 2);
-    }
-    return value;
+    return ParseValue<T>(it->second);
   }
 
  private:
@@ -256,7 +252,8 @@ class HotReloadFileReader {
       }
 
       last_write_time_ = std::filesystem::last_write_time(file_path_);
-      std::cout << "Config file reloaded: \n  " << file_path_ << std::endl;
+      // std::cout << "Config file reloaded: \n  " << file_path_ << std::endl;
+      SPDLOG_INFO("Config file reloaded: {}",file_path_);
     } catch (const std::exception& e) {
       std::cerr << "Error loading config: " << e.what() << std::endl;
     }
